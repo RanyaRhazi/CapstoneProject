@@ -32,6 +32,3 @@ def transcribe_realtime_speech():
         transcription = tokenizer.batch_decode(predicted_ids)
 
     return transcription[0]
-
-
-
