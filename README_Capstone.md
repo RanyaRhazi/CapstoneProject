@@ -1,4 +1,4 @@
-# 🗣️ English Speech to French Text Translator
+# English Speech to French Text Translator
 
 This capstone project implements a multimodal NLP pipeline that transcribes **spoken English** and translates it into **written French** using two open-source pretrained models from Hugging Face.
 
@@ -6,16 +6,16 @@ Built entirely in Python, the system combines real-time speech recognition with 
 
 ---
 
-## ✨ Features
+## Features
 
-- 🎙️ **Real-time speech transcription** using [Wav2Vec2](https://huggingface.co/facebook/wav2vec2-base-960h)
-- 🌍 **Neural machine translation** with [MarianMT](https://huggingface.co/Helsinki-NLP/opus-mt-en-fr)
-- ⚙️ Modular code with clean separation between ASR and translation logic
-- 📦 Built using Hugging Face Transformers, PyTorch, and Torchaudio
+- **Real-time speech transcription** using [Wav2Vec2](https://huggingface.co/facebook/wav2vec2-base-960h)
+- **Neural machine translation** with [MarianMT](https://huggingface.co/Helsinki-NLP/opus-mt-en-fr)
+- Modular code with clean separation between ASR and translation logic
+- Built using Hugging Face Transformers, PyTorch, and Torchaudio
 
 ---
 
-## 🧠 Model Architecture
+## Model Architecture
 
 | Task                  | Model Used                                |
 |-----------------------|--------------------------------------------|
@@ -24,7 +24,7 @@ Built entirely in Python, the system combines real-time speech recognition with 
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 CapstoneProject/
@@ -35,9 +35,9 @@ CapstoneProject/
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
-### ✅ Requirements
+### Requirements
 
 - Python 3.8+
 - torch
@@ -51,7 +51,7 @@ Install dependencies:
 pip install torch torchaudio sounddevice transformers
 ```
 
-### ▶️ Run the Translator
+### Run the Translator
 
 ```bash
 python main.py
@@ -64,7 +64,7 @@ You’ll be prompted to speak into your microphone for 10 seconds. The system wi
 
 ---
 
-## 📷 Example Output
+## Example Output
 
 ```
 Recording...
@@ -76,7 +76,7 @@ bonjour mon nom est ranya et j'aime travailler avec l'intelligence artificielle
 
 ---
 
-## 📝 Notes
+## Notes
 
 - The models are loaded at runtime — ensure you have an internet connection on the first run.
 - The translation supports other language pairs by changing `source_language` and `target_language` codes (e.g., `en-de`, `en-es`).
@@ -84,7 +84,7 @@ bonjour mon nom est ranya et j'aime travailler avec l'intelligence artificielle
 
 ---
 
-## 🧑‍💻 Author
+## Author
 
 **Ranya Rhazi**  
 Machine Learning Engineer  
@@ -92,6 +92,6 @@ Machine Learning Engineer
 
 ---
 
-## 📄 License
+## License
 
 This project is for academic demonstration purposes only.
