@@ -1,5 +1,5 @@
-import speech_recognition_model 
-import machine_translation 
+from src import speech_recognition_model
+from src import machine_translation
 
 if __name__ == "__main__":
     try:
