@@ -1,7 +1,8 @@
 from transformers import MarianMTModel, MarianTokenizer
 
 def translate_text(text, source_language, target_language):
-    # Load the translation model and tokenizer
+    # Load the translation model and tokenizer 
+    ## for production load once globally and reuse instead of re-downloading every function call
     model_name = f'Helsinki-NLP/opus-mt-{source_language}-{target_language}'
     model = MarianMTModel.from_pretrained(model_name)
     tokenizer = MarianTokenizer.from_pretrained(model_name)
