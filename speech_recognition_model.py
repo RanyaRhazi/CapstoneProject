@@ -4,15 +4,15 @@ import numpy as np
 import torch
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
 
+# Load the Wav2Vec2 model and tokenizer
+model_name = "facebook/wav2vec2-base-960h"
+tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_name)
+model = Wav2Vec2ForCTC.from_pretrained(model_name)
+
 def transcribe_realtime_speech():
     # Audio sampling parameters
     sample_rate = 16000
     duration = 10
-
-    # Load the Wav2Vec2 model and tokenizer
-    model_name = "facebook/wav2vec2-base-960h"
-    tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_name)
-    model = Wav2Vec2ForCTC.from_pretrained(model_name)
 
     # Audio Recording
     print("Recording...")
