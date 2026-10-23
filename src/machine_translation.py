@@ -1,18 +1,30 @@
-from transformers import MarianMTModel, MarianTokenizer
+"""English-to-French translation with MarianMT (Helsinki-NLP/opus-mt-en-fr).
 
-# Load the translation model and tokenizer 
-## for production load once globally and reuse instead of re-downloading every function call
-model_name = f'Helsinki-NLP/opus-mt-{source_language}-{target_language}'
-model = MarianMTModel.from_pretrained(model_name)
-tokenizer = MarianTokenizer.from_pretrained(model_name)
+The model is loaded once, on first use, so importing this module is cheap.
+"""
+MODEL_NAME = "Helsinki-NLP/opus-mt-en-fr"
 
-def translate_text(text, source_language, target_language):
+_tokenizer = None
+_model = None
 
-    # Tokenize the input text and generate translation
+
+def _load_model():
+    global _tokenizer, _model
+    if _model is None:
+        from transformers import MarianMTModel, MarianTokenizer
+
+        _tokenizer = MarianTokenizer.from_pretrained(MODEL_NAME)
+        _model = MarianMTModel.from_pretrained(MODEL_NAME)
+        _model.eval()
+    return _tokenizer, _model
+
+
+def translate(text: str) -> str:
+    """Translate English text to French."""
+    if not text.strip():
+        return ""
+
+    tokenizer, model = _load_model()
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-    translation = model.generate(**inputs)
-
-    # Decode the translation output
-    translated_text = tokenizer.decode(translation[0], skip_special_tokens=True)
-
-    return translated_text
+    output_ids = model.generate(**inputs)
+    return tokenizer.decode(output_ids[0], skip_special_tokens=True)
