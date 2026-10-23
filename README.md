@@ -1,97 +1,87 @@
-# English Speech to French Text Translator
+# Frenglish: English Speech to French Text
 
-This capstone project implements a multimodal NLP pipeline that transcribes **spoken English** and translates it into **written French** using two open-source pretrained models from Hugging Face.
+Speak English into a microphone and get French text back. This repo holds the speech-to-text and translation pipeline from my undergraduate capstone thesis at Al Akhawayn University (Fall 2023, supervised by Dr. Tajjeeddine Rachidi).
 
-Built entirely in Python, the system combines real-time speech recognition with neural machine translation, making it a compact proof of concept for multilingual voice interfaces.
+Abstract accepted for presentation at BrainWeek: AI & Telehealth Conference (2023).
 
----
+## The problem
 
-## Features
+There are two common ways to turn English speech into French text:
 
-- **Real-time speech transcription** using [Wav2Vec2](https://huggingface.co/facebook/wav2vec2-base-960h)
-- **Neural machine translation** with [MarianMT](https://huggingface.co/Helsinki-NLP/opus-mt-en-fr)
-- Modular code with clean separation between ASR and translation logic
-- Built using Hugging Face Transformers, PyTorch, and Torchaudio
+- **Cascaded:** transcribe the English speech to English text, then translate the text.
+- **Direct:** translate the speech to French speech, then transcribe the French audio.
 
----
+The thesis compared the two on translation quality and robustness to accents, speaking speed and background noise, to decide which one a mobile app should use. The cascaded pipeline won, and it's the one implemented here.
 
-## Model Architecture
+## How it works
 
-| Task                  | Model Used                                |
-|-----------------------|--------------------------------------------|
-| Speech-to-Text (ASR)  | `facebook/wav2vec2-base-960h`              |
-| Text Translation      | `Helsinki-NLP/opus-mt-en-fr`               |
-
----
-
-## Project Structure
-
-```
-CapstoneProject/
-├── main.py                        # Entry point – runs ASR + Translation
-├── speech_recognition_model.py   # Real-time audio transcription logic
-├── machine_translation.py        # Text-to-text translation logic
+```mermaid
+flowchart LR
+    A[Microphone<br/>16 kHz mono] --> B[Wav2Vec2<br/>facebook/wav2vec2-base-960h]
+    B -->|English text| C[MarianMT<br/>Helsinki-NLP/opus-mt-en-fr]
+    C -->|French text| D[Console output]
 ```
 
----
+| Step | Model | Code |
+|---|---|---|
+| Speech to English text | [`facebook/wav2vec2-base-960h`](https://huggingface.co/facebook/wav2vec2-base-960h) | `src/speech_recognition_model.py` |
+| English to French text | [`Helsinki-NLP/opus-mt-en-fr`](https://huggingface.co/Helsinki-NLP/opus-mt-en-fr) | `src/machine_translation.py` |
+| The two steps chained | | `src/pipeline.py` |
 
-## How to Run
+Models download from Hugging Face on first use and are loaded once per run.
 
-### Requirements
-
-- Python 3.8+
-- torch
-- torchaudio
-- sounddevice
-- transformers
-
-Install dependencies:
+## Run it
 
 ```bash
-pip install torch torchaudio sounddevice transformers
+pip install -r requirements.txt
+python main.py                 # records 10 seconds
+python main.py --duration 5    # records 5 seconds
 ```
 
-### Run the Translator
+You need a working microphone. The first run downloads both models, so it needs an internet connection.
+
+To use the pipeline from your own code with 16 kHz audio:
+
+```python
+from src.pipeline import speech_to_french
+
+result = speech_to_french(audio)   # 1-D float array, 16 kHz
+print(result["transcription"], result["translation"])
+```
+
+## Tests
 
 ```bash
-python main.py
+python -m unittest discover -s tests -t . -v
 ```
 
-You’ll be prompted to speak into your microphone for 10 seconds. The system will:
-1. Transcribe your English speech
-2. Translate the transcription into French
-3. Print both results to the console
+The tests mock both models, so they check the pipeline's wiring and input handling, not translation quality.
 
----
+## Thesis results (2023)
 
-## Example Output
+These are the results reported in the thesis. The evaluation code isn't in this repo yet, so they can't be reproduced from it.
 
-```
-Recording...
-Transcribed Speech:
-hello my name is ranya and i love working with artificial intelligence
-Translation:
-bonjour mon nom est ranya et j'aime travailler avec l'intelligence artificielle
-```
+The evaluation used 7 datasets: LibriSpeech, CommonVoice, VoxCeleb, Europarl, Common Crawl, OpenSubtitles and VoxForge. Robustness was measured across accent variation, speech-rate variation and noise.
 
----
+| Component | Metric | Result |
+|---|---|---|
+| Wav2Vec2 (transcription) | Word error rate | 3.2% (standard English) to 6.5% (noisy) |
+| | Robustness | 92.8% |
+| MarianMT (cascaded translation) | BLEU | 79.5–85.2 |
+| | Robustness | 88.6% |
+| | Human-rated naturalness | 4.3 / 5 |
+| OpusMT (direct translation) | BLEU | 76.2–82.5 |
+| | Robustness | 87.9% |
+| | Human-rated naturalness | 3.9 / 5 |
 
-## Notes
+The cascaded pipeline scored higher on BLEU, robustness and naturalness, and was simpler to build, so it was selected.
 
-- The models are loaded at runtime — ensure you have an internet connection on the first run.
-- The translation supports other language pairs by changing `source_language` and `target_language` codes (e.g., `en-de`, `en-es`).
-- You can modify the `duration` variable in `speech_recognition_model.py` to change how long the system listens.
+TODO (Ranya): the thesis also included a Flask backend and a React Native + Expo mobile app. Add them here, or remove this line once decided.
 
----
+## Limitations
 
-## Author
-
-**Ranya Rhazi**  
-Machine Learning Engineer  
-[LinkedIn](https://www.linkedin.com/in/ranya-rhazi/) | [GitHub](https://github.com/RanyaRhazi)
-
----
-
-## License
-
-This project is for academic demonstration purposes only.
+- **Recorded clips, not streaming.** The program records a fixed-length clip and then processes it; it doesn't translate while you speak.
+- **English to French only.** Both models are fixed to this language pair.
+- **Wav2Vec2 has no punctuation or casing**, so the translator receives unpunctuated lowercase text, which can hurt translation of longer sentences.
+- **Long clips:** inputs past the translator's maximum length are truncated.
+- `wav2vec2-base-960h` was trained on read audiobook speech (LibriSpeech), so accuracy drops on accented, fast or noisy speech, as the thesis robustness numbers show.
