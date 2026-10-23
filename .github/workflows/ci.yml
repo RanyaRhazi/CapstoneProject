@@ -32,6 +32,6 @@ jobs:
       - name: Run both models on real speech
         run: |
           set -o pipefail
-          python scripts/smoke_test.py 2>&1 | tee smoke.txt || {
-            echo "::error title=Smoke test failed::$(tail -c 3500 smoke.txt | tr '\n' '|')"; exit 1; }
-          echo "::notice title=Smoke test output::$(tail -c 3500 smoke.txt | tr '\n' '|')"
+          python -X faulthandler -u scripts/smoke_test.py 2>&1 | tee smoke.txt || {
+            echo "::error title=Smoke test failed::$(tail -c 3500 smoke.txt | sed ':a;N;$!ba;s/\n/%0A/g')"; exit 1; }
+          echo "::notice title=Smoke test output::$(tail -c 3500 smoke.txt | sed ':a;N;$!ba;s/\n/%0A/g')"
