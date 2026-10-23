@@ -1,17 +1,23 @@
+"""Record English speech from the microphone and print its French translation."""
+import argparse
+
 from src import speech_recognition_model
-from src import machine_translation
+from src.pipeline import speech_to_french
+
+
+def main():
+    parser = argparse.ArgumentParser(description="English speech to French text.")
+    parser.add_argument("--duration", type=float, default=10.0, help="seconds to record (default: 10)")
+    args = parser.parse_args()
+
+    audio = speech_recognition_model.record(args.duration)
+    result = speech_to_french(audio)
+
+    print("Transcribed speech:")
+    print(result["transcription"] or "(no speech detected)")
+    print("French translation:")
+    print(result["translation"])
+
 
 if __name__ == "__main__":
-    try:
-        transcribed_speech = speech_recognition_model.transcribe_realtime_speech()
-        source_language = "en"  # Change to the actual source language
-        target_language = "fr"  # Change to the desired target language
-
-        translated_speech = machine_translation.translate_text(transcribed_speech, source_language, target_language)
-
-        print("Transcribed Speech:")
-        print(transcribed_speech)
-        print("Translation:")
-        print(translated_speech)
-    except Exception as e:
-        print("An error occurred:", e)
+    main()
