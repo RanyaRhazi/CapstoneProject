@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: pip install numpy scipy flask
+      - name: Run unit tests (models mocked)
+        run: python -m unittest discover -s tests -t . -v
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt -r eval/requirements.txt
+      - name: Run both models on real speech
+        run: |
+          set -o pipefail
+          python -X faulthandler -u scripts/smoke_test.py 2>&1 | tee smoke.txt || {
+            tail -n 12 smoke.txt | while IFS= read -r line; do echo "::error::$line"; done; exit 1; }
+          tail -n 10 smoke.txt | while IFS= read -r line; do echo "::notice::$line"; done

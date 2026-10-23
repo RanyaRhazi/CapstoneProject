@@ -1,0 +1,4 @@
+datasets>=2.19
+soundfile>=0.12
+jiwer>=3.0
+sacrebleu>=2.4
