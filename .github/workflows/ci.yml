@@ -29,8 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install -r requirements.txt
-          pip install datasets soundfile jiwer
+          pip install -r requirements.txt -r eval/requirements.txt
       - name: Run both models on real speech
         run: |
           set -o pipefail
