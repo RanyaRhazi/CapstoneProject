@@ -1,0 +1,55 @@
+{
+    "asr_model": "facebook/wav2vec2-base-960h",
+    "mt_model": "Helsinki-NLP/opus-mt-en-fr",
+    "python": "3.11.17",
+    "asr": {
+        "dataset": "LibriSpeech test-clean (openslr/librispeech_asr), first utterances in dataset order",
+        "utterances": 200,
+        "audio_seconds": 1563.4549375,
+        "conditions": [
+            {
+                "condition": "Clean",
+                "wer": 0.028401585204755615,
+                "cer": 0.009011264080100126,
+                "seconds": 135.606650217
+            },
+            {
+                "condition": "White noise, 20 dB SNR",
+                "wer": 0.03456627036547776,
+                "cer": 0.011848143512724238,
+                "seconds": 128.71855350399997
+            },
+            {
+                "condition": "White noise, 10 dB SNR",
+                "wer": 0.1444297666226332,
+                "cer": 0.06036712557363371,
+                "seconds": 128.721469566
+            },
+            {
+                "condition": "White noise, 5 dB SNR",
+                "wer": 0.5651695288419198,
+                "cer": 0.3072173550271172,
+                "seconds": 128.77900392900005
+            },
+            {
+                "condition": "Speed 0.9x",
+                "wer": 0.028181417877586965,
+                "cer": 0.00951188986232791,
+                "seconds": 143.28900663699994
+            },
+            {
+                "condition": "Speed 1.1x",
+                "wer": 0.02796125055041832,
+                "cer": 0.008760951188986232,
+                "seconds": 116.77433458600001
+            }
+        ]
+    },
+    "mt": {
+        "dataset": "WMT14 newstest2014 en-fr (wmt/wmt14), first sentences in dataset order",
+        "sentences": 500,
+        "bleu": 40.5051281360419,
+        "chrf": 64.57051937868485,
+        "seconds": 173.94024973900002
+    }
+}

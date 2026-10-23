@@ -95,6 +95,32 @@ python eval/run_eval.py --asr-n 200 --mt-n 500
 
 It also runs in GitHub Actions ([Evaluate workflow](.github/workflows/evaluate.yml)) and writes `eval/results.json`.
 
+### Results
+
+From [this GitHub Actions run](https://github.com/RanyaRhazi/CapstoneProject/actions/runs/39996001350), CPU only; raw output in [`eval/results.json`](eval/results.json).
+
+**Transcription (Wav2Vec2)** on the first 200 utterances of LibriSpeech test-clean (26 minutes of audio):
+
+| Condition | WER | CER |
+|---|---|---|
+| Clean | 2.8% | 0.9% |
+| White noise, 20 dB SNR | 3.5% | 1.2% |
+| White noise, 10 dB SNR | 14.4% | 6.0% |
+| White noise, 5 dB SNR | 56.5% | 30.7% |
+| Speed 0.9x | 2.8% | 1.0% |
+| Speed 1.1x | 2.8% | 0.9% |
+
+Accuracy barely changes at 20 dB SNR or with 10% speed changes, rises to 14% WER at 10 dB, and breaks down at 5 dB, where more than half the words are wrong. For reference, the model card reports 3.4% WER on the full test-clean set.
+
+**Translation (MarianMT)** on the first 500 sentences of WMT14 newstest2014 English-to-French:
+
+| Metric | Score |
+|---|---|
+| BLEU | 40.5 |
+| chrF | 64.6 |
+
+These test sets differ from the thesis's, so the two sets of numbers aren't directly comparable.
+
 ## Thesis results (2023)
 
 These are the results reported in the thesis. The thesis evaluation code isn't in this repo, so these numbers can't be reproduced from it; the reproduction above uses different test sets.
