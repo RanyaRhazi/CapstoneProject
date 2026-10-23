@@ -1,34 +1,46 @@
-import torchaudio
-import sounddevice as sd
-import numpy as np
-import torch
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
+"""English speech recognition with Wav2Vec2 (facebook/wav2vec2-base-960h).
 
-# Load the Wav2Vec2 model and tokenizer
-model_name = "facebook/wav2vec2-base-960h"
-tokenizer = Wav2Vec2Tokenizer.from_pretrained(model_name)
-model = Wav2Vec2ForCTC.from_pretrained(model_name)
+The model is loaded once, on first use, so importing this module is cheap.
+"""
+MODEL_NAME = "facebook/wav2vec2-base-960h"
+SAMPLE_RATE = 16000  # the model was trained on 16 kHz audio
 
-def transcribe_realtime_speech():
-    # Audio sampling parameters
-    sample_rate = 16000
-    duration = 10
+_processor = None
+_model = None
 
-    # Audio Recording
-    print("Recording...")
-    audio_data = sd.rec(int(sample_rate * duration), samplerate=sample_rate, channels=1)
+
+def _load_model():
+    global _processor, _model
+    if _model is None:
+        from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+
+        _processor = Wav2Vec2Processor.from_pretrained(MODEL_NAME)
+        _model = Wav2Vec2ForCTC.from_pretrained(MODEL_NAME)
+        _model.eval()
+    return _processor, _model
+
+
+def record(duration: float = 10.0):
+    """Record mono audio from the default microphone and return it as a 1-D float array."""
+    import sounddevice as sd
+
+    print(f"Recording for {duration:g} seconds...")
+    audio = sd.rec(int(SAMPLE_RATE * duration), samplerate=SAMPLE_RATE, channels=1, dtype="float32")
     sd.wait()
+    return audio[:, 0]
 
-    audio_data = audio_data[:, 0]
 
-    # Convert the audio data to a format recognized by the model
-    audio_signal = torch.tensor(audio_data)
+def transcribe(audio, sample_rate: int = SAMPLE_RATE) -> str:
+    """Transcribe a 1-D array of 16 kHz English speech to lowercase text."""
+    if sample_rate != SAMPLE_RATE:
+        raise ValueError(f"Expected {SAMPLE_RATE} Hz audio, got {sample_rate} Hz.")
 
-    # Perform real-time speech recognition
+    import torch
+
+    processor, model = _load_model()
+    inputs = processor(audio, sampling_rate=SAMPLE_RATE, return_tensors="pt")
     with torch.no_grad():
-        input_values = tokenizer(audio_data, return_tensors="pt").input_values
-        logits = model(input_values).logits
-        predicted_ids = torch.argmax(logits, dim=-1)
-        transcription = tokenizer.batch_decode(predicted_ids)
-
-    return transcription[0]
+        logits = model(inputs.input_values).logits
+    predicted_ids = torch.argmax(logits, dim=-1)
+    # The model outputs uppercase letters; lowercase reads better and suits the translator.
+    return processor.batch_decode(predicted_ids)[0].strip().lower()
