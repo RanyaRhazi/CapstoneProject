@@ -1,0 +1,41 @@
+name: Evaluate
+
+on:
+  workflow_dispatch:
+    inputs:
+      asr_n:
+        description: LibriSpeech utterances
+        default: "200"
+      mt_n:
+        description: WMT14 sentences
+        default: "500"
+  push:
+    branches: [master]
+    paths: ["eval/run_eval.py", "src/**"]
+  pull_request:
+    paths: ["eval/run_eval.py", "src/**"]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt -r eval/requirements.txt
+      - name: Run evaluation
+        run: |
+          set -o pipefail
+          python -X faulthandler -u eval/run_eval.py --asr-n "${{ inputs.asr_n || 200 }}" --mt-n "${{ inputs.mt_n || 500 }}" 2>&1 | tee eval.txt || {
+            echo "::error title=Evaluation failed::$(tail -c 3500 eval.txt | sed ':a;N;$!ba;s/\n/%0A/g')"; exit 1; }
+          echo "::notice title=Evaluation results::$(python -c 'import json;print(json.dumps(json.load(open("eval/results.json"))))')"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: eval/results.json

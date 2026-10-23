@@ -23,8 +23,15 @@ def translate(text: str) -> str:
     """Translate English text to French."""
     if not text.strip():
         return ""
+    return translate_batch([text])[0]
+
+
+def translate_batch(texts: list[str]) -> list[str]:
+    """Translate a list of English sentences to French in one forward pass."""
+    if not texts:
+        return []
 
     tokenizer, model = _load_model()
-    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    inputs = tokenizer(texts, return_tensors="pt", padding=True, truncation=True)
     output_ids = model.generate(**inputs)
-    return tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    return tokenizer.batch_decode(output_ids, skip_special_tokens=True)
